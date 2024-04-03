@@ -92,6 +92,12 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
+                    <image>
+                        <name>pollitodev/spring-cloud-v2-${project.artifactId}:${project.version}</name>
+                    </image>
+                    <pullPolicy>
+                        IF_NOT_PRESENT
+                    </pullPolicy>
                 </configuration>
             </plugin>
             <plugin>
