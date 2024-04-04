@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: api-gateway
+  name: api-gateway
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-gateway
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+    spec:
+      containers:
+      - image: pollitodev/spring-cloud-v2-api-gateway:0.1.0-SNAPSHOT
+        name: spring-cloud-v2-api-gateway
+        resources:
+          limits:
+            cpu: 500m
+            ephemeral-storage: 1Gi
+            memory: 2Gi
+          requests:
+            cpu: 500m
+            ephemeral-storage: 1Gi
+            memory: 2Gi
+        securityContext:
+          capabilities:
+            drop:
+              - NET_RAW
+        volumeMounts:
+        - name: config-volume
+          mountPath: /config
+          readOnly: true
+        env:
+          - name: SPRING_CONFIG_ADDITIONAL-LOCATION
+            value: "file:/config/"
+      volumes:
+      - name: config-volume
+        configMap:
+          name: api-gateway
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: api-gateway
+  name: api-gateway
+  namespace: default
+spec:
+  ports:
+    - port: 8765
+      protocol: TCP
+      targetPort: 8765
+  selector:
+    app: api-gateway
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-gateway
+  namespace: default
+data:
+  application.properties: |-
+    eureka.client.serviceUrl.defaultZone=http://naming-server:8761/eureka/
